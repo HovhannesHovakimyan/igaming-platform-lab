@@ -1,0 +1,52 @@
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Go
+bin/
+dist/
+*.exe
+*.test
+*.out
+coverage.*
+vendor/
+go.work.sum
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+!*.example.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.tfstate.lock.info
+*.tfplan
+
+# Kubernetes / Helm
+kubeconfig*
+*.kubeconfig
+charts/**/charts/*.tgz
+
+# Secrets and local env
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+*.secret.yaml
+
+# Load test / tooling output
+load/**/results/
+*.log
