@@ -2,7 +2,15 @@
 
 A sample iGaming platform built on a home Kubernetes cluster. The aim is to learn what the iGaming industry needs from a platform and to practise Platform/DevOps engineering on the stack named in the target job description: Kubernetes, AWS, observability, Cloudflare, LDAP/Okta, MySQL, MongoDB, ClickHouse, Snowflake, Metabase, Debezium, NATS JetStream and Kafka/Strimzi.
 
-Status: **planning**. Nothing has been built yet.
+Status: **Phase 0 done (2026-10-20)**. Next: Phase 1.
+
+### Phase 0 findings
+
+- Cluster: k3d `igaming-lab` with 1 server and 3 agents, k3s v1.37.1, on the Windows desktop (`192.168.68.52`, DHCP-reserved). About 47 GiB RAM and 10 CPUs. See [infra/k3d](../infra/k3d/README.md).
+- From the Mac: the API on `:6444` is reachable with valid TLS. Host ports 80/443 reach the cluster once a Windows Firewall rule allows them.
+- Traefik is disabled. k3s v1.37 installs the Gateway API CRDs by itself (`helm-install-gateway-api-crd`), so check their version against what Envoy Gateway expects in Phase 1.
+- NetworkPolicy should be enforced by k3s's embedded kube-router. Verify in Phase 8.
+- HTTPS for `*.igaming.lab` arrives with cert-manager in Phase 1. Name resolution for `*.igaming.lab` on the Mac is still to be set up.
 
 ## 1. Decisions
 

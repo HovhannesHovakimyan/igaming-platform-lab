@@ -21,7 +21,7 @@ git clone https://github.com/HovhannesHovakimyan/igaming-platform-lab.git
 cd igaming-platform-lab
 k3d cluster create --config infra/k3d/igaming-lab.yaml
 kubectl get nodes                # 4 nodes, Ready
-k3d kubeconfig get igaming-lab > igaming-lab.kubeconfig
+k3d kubeconfig write igaming-lab --output igaming-lab.kubeconfig   # not `>`: PowerShell 5.1 writes UTF-16
 ```
 
 If ports 80/443 are not reachable from the Mac, allow them in Windows Firewall (admin PowerShell):
@@ -32,7 +32,7 @@ New-NetFirewallRule -DisplayName "igaming-lab HTTP/HTTPS" -Direction Inbound -Pr
 
 ## Connect the Mac
 
-Copy `igaming-lab.kubeconfig` to the Mac, then merge it:
+Copy `igaming-lab.kubeconfig` to the Mac (Remote Desktop file copy works), then merge it:
 
 ```bash
 cp ~/.kube/config ~/.kube/config.bak
