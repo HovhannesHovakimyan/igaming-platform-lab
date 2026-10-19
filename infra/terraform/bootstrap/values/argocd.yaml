@@ -5,6 +5,9 @@ configs:
   params:
     # TLS terminates at Envoy Gateway.
     server.insecure: true
+    # Diff against what the API server would persist, so server-side
+    # defaults (Gateway API, CRDs) don't show as drift.
+    controller.diff.server.side: true
   cm:
     # Applications have no health of their own; restore it so sync waves in
     # the app-of-apps wait for each child Application to become Healthy.
