@@ -9,7 +9,7 @@ Status: **Phase 1 done (2026-10-20)**. Next: Phase 2 (observability).
 - `task bootstrap` installs Argo CD with Terraform. Argo CD then syncs cert-manager, Envoy Gateway, External Secrets, Kyverno (with baseline policies in Audit mode), LocalStack, and the cluster config. All apps are Synced and Healthy.
 - https://argocd.igaming.lab serves a certificate from the internal CA, which is trusted on the Mac. HTTP redirects to HTTPS.
 - `task localstack` creates a KMS key, two encrypted S3 buckets and a test secret. The test secret reaches the cluster through External Secrets.
-- The only Kyverno audit failures are the k3s servicelb pods in `kube-system`. Exclude them before enforcing in Phase 8.
+- Kyverno policy reports show 0 failures. The k3s servicelb pods are exempted by a narrow PolicyException, and exceptions are only allowed in the `kyverno` namespace. From Phase 2 on, any failure above zero should alert.
 - Decisions: [ADR 0001](adr/0001-gitops-bootstrap.md), [ADR 0002](adr/0002-edge-and-gateway-api-crds.md). Runbook: [platform-bootstrap](runbooks/platform-bootstrap.md).
 
 ### Phase 0 findings

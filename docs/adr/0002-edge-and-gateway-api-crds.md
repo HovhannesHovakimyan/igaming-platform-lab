@@ -23,4 +23,4 @@ Status: accepted (2026-10-20)
 
 - Two controllers never fight over the same CRDs.
 - Before upgrading k3s or Envoy Gateway, check that the Gateway API version k3s ships is supported by the Envoy Gateway release.
-- The servicelb pods in `kube-system` use host ports and capabilities, so they appear as failures in Kyverno's audit reports. They are expected and should be excluded before enforcement (Phase 8).
+- The servicelb DaemonSet and pods in `kube-system` need host ports, NET_ADMIN and sysctls. A narrow Kyverno PolicyException (`gitops/platform/config/policy-exceptions.yaml`) exempts only them, and only from those three policies. They show as `skip` in policy reports, and the failure count stays at 0.
