@@ -1,0 +1,33 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  parentRefs:
+    - name: igaming
+      namespace: edge
+      sectionName: https
+  hostnames:
+    - argocd.igaming.lab
+  rules:
+    - backendRefs:
+        - name: argocd-server
+          port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: localstack
+  namespace: localstack
+spec:
+  parentRefs:
+    - name: igaming
+      namespace: edge
+      sectionName: https
+  hostnames:
+    - localstack.igaming.lab
+  rules:
+    - backendRefs:
+        - name: localstack
+          port: 4566

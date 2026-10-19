@@ -1,0 +1,46 @@
+# AWS emulator. The auth token Secret (localstack-auth) is created by
+# infra/terraform/bootstrap. State is in-memory: after a pod restart,
+# re-run `task localstack` to recreate the AWS resources.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: localstack
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://localstack.github.io/helm-charts
+    chart: localstack
+    targetRevision: 0.7.1
+    helm:
+      releaseName: localstack
+      valuesObject:
+        image:
+          repository: localstack/localstack
+          tag: "2026.10.0"
+        service:
+          type: ClusterIP
+        extraEnvVars:
+          - name: LOCALSTACK_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: localstack-auth
+                key: LOCALSTACK_AUTH_TOKEN
+          - name: DEFAULT_REGION
+            value: eu-central-1
+          - name: SERVICES
+            value: s3,secretsmanager,kms,sqs,sts,iam
+        resources:
+          requests: { cpu: 100m, memory: 512Mi }
+          limits: { memory: 2Gi }
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: localstack
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true]
+    retry: { limit: 5, backoff: { duration: 10s, factor: 2, maxDuration: 3m } }

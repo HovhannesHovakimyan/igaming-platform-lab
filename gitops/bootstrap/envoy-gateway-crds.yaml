@@ -1,0 +1,32 @@
+# Envoy Gateway's own CRDs only. The Gateway API CRDs (v1.6.1) are installed
+# and upgraded by k3s itself, so this app must not manage them.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: envoy-gateway-crds
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: docker.io/envoyproxy
+    chart: gateway-crds-helm
+    targetRevision: 1.9.2
+    helm:
+      releaseName: envoy-gateway-crds
+      valuesObject:
+        crds:
+          gatewayAPI:
+            enabled: false
+          envoyGateway:
+            enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: envoy-gateway-system
+  syncPolicy:
+    automated: { prune: false, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    retry: { limit: 5, backoff: { duration: 10s, factor: 2, maxDuration: 3m } }

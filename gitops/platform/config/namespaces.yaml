@@ -1,0 +1,73 @@
+# Application environments. Pod Security Admission enforces "baseline" and
+# warns on "restricted"; quotas keep one environment from starving the other.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: igaming-staging
+  labels:
+    igaming.lab/environment: staging
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/audit: restricted
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute
+  namespace: igaming-staging
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.memory: 12Gi
+    pods: "60"
+    persistentvolumeclaims: "15"
+    requests.storage: 100Gi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: defaults
+  namespace: igaming-staging
+spec:
+  limits:
+    - type: Container
+      defaultRequest: { cpu: 50m, memory: 64Mi }
+      default: { memory: 256Mi }
+      max: { memory: 4Gi }
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: igaming-prod
+  labels:
+    igaming.lab/environment: prod
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/audit: restricted
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute
+  namespace: igaming-prod
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: 16Gi
+    limits.memory: 24Gi
+    pods: "100"
+    persistentvolumeclaims: "20"
+    requests.storage: 200Gi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: defaults
+  namespace: igaming-prod
+spec:
+  limits:
+    - type: Container
+      defaultRequest: { cpu: 50m, memory: 64Mi }
+      default: { memory: 256Mi }
+      max: { memory: 4Gi }

@@ -1,0 +1,29 @@
+# Pod Security Standards (baseline) in Audit mode: violations show up in
+# PolicyReports without blocking anything. Enforcement comes in Phase 8.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kyverno-policies
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://kyverno.github.io/kyverno
+    chart: kyverno-policies
+    targetRevision: 3.9.1
+    helm:
+      releaseName: kyverno-policies
+      valuesObject:
+        podSecurityStandard: baseline
+        validationFailureAction: Audit
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kyverno
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [ServerSideApply=true]
+    retry: { limit: 5, backoff: { duration: 10s, factor: 2, maxDuration: 3m } }

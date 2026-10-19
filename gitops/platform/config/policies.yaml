@@ -1,0 +1,57 @@
+# Workload hygiene for the application namespaces. Audit only for now;
+# switched to Deny in Phase 8.
+apiVersion: policies.kyverno.io/v1beta1
+kind: ValidatingPolicy
+metadata:
+  name: require-requests-limits
+  annotations:
+    policies.kyverno.io/description: >-
+      Containers must declare CPU and memory requests and a memory limit so
+      the scheduler and quotas can do their job.
+spec:
+  validationActions: [Audit]
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+        - key: igaming.lab/environment
+          operator: Exists
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  validations:
+    - expression: >-
+        object.spec.containers.all(c,
+          has(c.resources) && has(c.resources.requests) && has(c.resources.limits) &&
+          'cpu' in c.resources.requests && 'memory' in c.resources.requests &&
+          'memory' in c.resources.limits)
+      message: Every container needs cpu/memory requests and a memory limit.
+---
+apiVersion: policies.kyverno.io/v1beta1
+kind: ValidatingPolicy
+metadata:
+  name: disallow-latest-tag
+  annotations:
+    policies.kyverno.io/description: >-
+      Images must be pinned to a tag or digest so deploys are reproducible
+      and rollbacks are meaningful.
+spec:
+  validationActions: [Audit]
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+        - key: igaming.lab/environment
+          operator: Exists
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  validations:
+    - expression: >-
+        object.spec.containers.all(c,
+          c.image.contains('@') ||
+          (c.image.split('/')[c.image.split('/').size() - 1].contains(':') &&
+           !c.image.endsWith(':latest')))
+      message: Images must use a pinned tag or digest, not latest or no tag.

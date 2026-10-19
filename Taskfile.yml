@@ -1,0 +1,46 @@
+version: "3"
+
+vars:
+  KUBE_CONTEXT: k3d-igaming-lab
+  LAB_DIR: "{{.HOME}}/.config/igaming-lab"
+  SECRETS_FILE: "{{.LAB_DIR}}/secrets.env"
+
+tasks:
+  bootstrap:
+    desc: Install Argo CD and the root app (everything else follows from git)
+    preconditions:
+      - sh: test -f "{{.SECRETS_FILE}}"
+        msg: "Create {{.SECRETS_FILE}} with LOCALSTACK_AUTH_TOKEN=... (chmod 600)"
+    cmds:
+      - terraform -chdir=infra/terraform/bootstrap init -upgrade
+      - |
+        set -a; . "{{.SECRETS_FILE}}"; set +a
+        TF_VAR_localstack_auth_token="$LOCALSTACK_AUTH_TOKEN" \
+          terraform -chdir=infra/terraform/bootstrap apply -auto-approve
+
+  localstack:
+    desc: Create the AWS resources in LocalStack
+    cmds:
+      - terraform -chdir=infra/terraform/localstack init -upgrade
+      - terraform -chdir=infra/terraform/localstack apply -auto-approve
+
+  trust-ca:
+    desc: Trust the lab root CA on this Mac (asks for sudo)
+    cmds:
+      - mkdir -p "{{.LAB_DIR}}"
+      - >-
+        kubectl --context {{.KUBE_CONTEXT}} -n cert-manager get secret igaming-lab-root-ca
+        -o jsonpath='{.data.ca\.crt}' | base64 -d > "{{.LAB_DIR}}/root-ca.crt"
+      - sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain "{{.LAB_DIR}}/root-ca.crt"
+
+  argocd:password:
+    desc: Print the initial Argo CD admin password
+    cmds:
+      - >-
+        kubectl --context {{.KUBE_CONTEXT}} -n argocd get secret argocd-initial-admin-secret
+        -o jsonpath='{.data.password}' | base64 -d; echo
+
+  status:
+    desc: Show Argo CD application status
+    cmds:
+      - kubectl --context {{.KUBE_CONTEXT}} -n argocd get applications

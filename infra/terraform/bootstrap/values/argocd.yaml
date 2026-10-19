@@ -1,0 +1,31 @@
+global:
+  domain: argocd.igaming.lab
+
+configs:
+  params:
+    # TLS terminates at Envoy Gateway.
+    server.insecure: true
+  cm:
+    # Applications have no health of their own; restore it so sync waves in
+    # the app-of-apps wait for each child Application to become Healthy.
+    resource.customizations.health.argoproj.io_Application: |
+      hs = {}
+      hs.status = "Progressing"
+      hs.message = ""
+      if obj.status ~= nil and obj.status.health ~= nil then
+        hs.status = obj.status.health.status
+        if obj.status.health.message ~= nil then
+          hs.message = obj.status.health.message
+        end
+      end
+      return hs
+  repositories:
+    envoyproxy:
+      name: envoyproxy
+      type: helm
+      url: docker.io/envoyproxy
+      enableOCI: "true"
+
+# SSO comes from Keycloak in Phase 7.
+dex:
+  enabled: false
