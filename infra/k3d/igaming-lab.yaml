@@ -1,0 +1,41 @@
+# k3d cluster for the iGaming platform lab.
+# Runs on the Windows desktop (Docker on WSL); managed from the Mac over the LAN.
+# Create: k3d cluster create --config infra/k3d/igaming-lab.yaml
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: igaming-lab
+servers: 1
+agents: 3
+image: rancher/k3s:v1.37.1-k3s1
+
+kubeAPI:
+  host: "192.168.68.52" # desktop LAN IP, written into the kubeconfig
+  hostIP: "0.0.0.0"
+  hostPort: "6444"
+
+# Expose the edge (Envoy Gateway, installed later) to the LAN.
+ports:
+  - port: 80:80
+    nodeFilters:
+      - loadbalancer
+  - port: 443:443
+    nodeFilters:
+      - loadbalancer
+
+options:
+  k3d:
+    wait: true
+    timeout: "300s"
+  k3s:
+    extraArgs:
+      # Envoy Gateway owns ingress; drop the bundled Traefik.
+      - arg: --disable=traefik
+        nodeFilters:
+          - server:*
+      - arg: --tls-san=192.168.68.52
+        nodeFilters:
+          - server:*
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true
