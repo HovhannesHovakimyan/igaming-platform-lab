@@ -2,7 +2,15 @@
 
 A sample iGaming platform built on a home Kubernetes cluster. The aim is to learn what the iGaming industry needs from a platform and to practise Platform/DevOps engineering on the stack named in the target job description: Kubernetes, AWS, observability, Cloudflare, LDAP/Okta, MySQL, MongoDB, ClickHouse, Snowflake, Metabase, Debezium, NATS JetStream and Kafka/Strimzi.
 
-Status: **Phase 0 done (2026-10-20)**. Next: Phase 1.
+Status: **Phase 1 done (2026-10-20)**. Next: Phase 2 (observability).
+
+### Phase 1 results
+
+- `task bootstrap` installs Argo CD with Terraform. Argo CD then syncs cert-manager, Envoy Gateway, External Secrets, Kyverno (with baseline policies in Audit mode), LocalStack, and the cluster config. All apps are Synced and Healthy.
+- https://argocd.igaming.lab serves a certificate from the internal CA, which is trusted on the Mac. HTTP redirects to HTTPS.
+- `task localstack` creates a KMS key, two encrypted S3 buckets and a test secret. The test secret reaches the cluster through External Secrets.
+- The only Kyverno audit failures are the k3s servicelb pods in `kube-system`. Exclude them before enforcing in Phase 8.
+- Decisions: [ADR 0001](adr/0001-gitops-bootstrap.md), [ADR 0002](adr/0002-edge-and-gateway-api-crds.md). Runbook: [platform-bootstrap](runbooks/platform-bootstrap.md).
 
 ### Phase 0 findings
 
