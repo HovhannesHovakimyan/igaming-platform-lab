@@ -15,6 +15,13 @@ spec:
     targetRevision: 3.9.1
     helm:
       releaseName: kyverno
+      valuesObject:
+        features:
+          # Exceptions may only be created in the kyverno namespace, so every
+          # one is visible and reviewed in gitops/platform/config.
+          policyExceptions:
+            enabled: true
+            namespace: kyverno
   destination:
     server: https://kubernetes.default.svc
     namespace: kyverno

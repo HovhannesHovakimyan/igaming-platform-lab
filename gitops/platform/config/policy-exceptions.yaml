@@ -1,0 +1,29 @@
+# Every exception names its policies, matches as narrowly as possible and
+# says why it exists. Exceptions are only honoured in the kyverno namespace.
+apiVersion: policies.kyverno.io/v1beta1
+kind: PolicyException
+metadata:
+  name: k3s-servicelb
+  namespace: kyverno
+spec:
+  properties:
+    reason: >-
+      k3s servicelb (klipper-lb) exposes LoadBalancer Services by binding
+      host ports on every node and forwarding with iptables, which needs
+      NET_ADMIN and ip_forward sysctls. It is part of the k3s distribution,
+      not something we deploy or can change.
+    owner: platform
+  policyRefs:
+    - kind: ValidatingPolicy
+      name: disallow-host-ports
+    - kind: ValidatingPolicy
+      name: disallow-capabilities
+    - kind: ValidatingPolicy
+      name: restrict-sysctls
+  # Only the svclb DaemonSet and its pods, identified by the label k3s sets.
+  matchConditions:
+    - name: k3s-servicelb-only
+      expression: >-
+        object.metadata.namespace == 'kube-system' &&
+        has(object.metadata.labels) &&
+        'svccontroller.k3s.cattle.io/svcname' in object.metadata.labels

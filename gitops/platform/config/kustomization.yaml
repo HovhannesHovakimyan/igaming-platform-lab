@@ -8,3 +8,4 @@ resources:
   - secret-store.yaml
   - namespaces.yaml
   - policies.yaml
+  - policy-exceptions.yaml
