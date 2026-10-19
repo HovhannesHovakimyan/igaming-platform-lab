@@ -1,0 +1,23 @@
+# TLS for every *.igaming.lab host, served by the edge Gateway.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-igaming-lab
+  namespace: edge
+spec:
+  secretName: wildcard-igaming-lab-tls
+  dnsNames:
+    - igaming.lab
+    - "*.igaming.lab"
+  duration: 2160h # 90 days
+  renewBefore: 720h
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  # macOS rejects TLS server certificates without the serverAuth EKU.
+  usages:
+    - server auth
+    - digital signature
+  issuerRef:
+    name: igaming-lab-ca
+    kind: ClusterIssuer

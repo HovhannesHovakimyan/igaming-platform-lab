@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - cert-issuers.yaml
   - gateway.yaml
+  - wildcard-certificate.yaml
   - routes.yaml
   - secret-store.yaml
   - namespaces.yaml
