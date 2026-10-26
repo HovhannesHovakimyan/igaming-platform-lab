@@ -4,7 +4,7 @@ A hands-on lab that builds and operates a sample iGaming platform on Kubernetes,
 
 The application is deliberately small: Go microservices for a wallet, players, a game provider, bonuses, risk and payments. Its job is to create real operational problems such as money integrity, traffic spikes at match start, consumer lag, failovers and bad deploys. The platform around it is the main subject of the lab.
 
-> **Status:** planning. See [docs/PLAN.md](docs/PLAN.md) for the architecture, decisions and phased roadmap.
+> **Status:** Phase 1 done. See [docs/PLAN.md](docs/PLAN.md) for the architecture, decisions and phased roadmap, and [docs/learning/](docs/learning/) for walkthroughs of each phase.
 
 ## Stack
 
